@@ -1,0 +1,8 @@
+[package]
+name = "fser"
+version = "0.1.0"
+authors = ["EnmakaiDev"]
+edition = "2024"
+
+[dependencies]
+rbook = "0.7.10"
