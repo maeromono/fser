@@ -1,7 +1,7 @@
 use std::io::Result;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use ratatui::{DefaultTerminal, Frame, style::Stylize, widgets::Paragraph};
+use ratatui::{DefaultTerminal, Frame, layout::{Constraint, Layout}, style::Stylize, widgets::Paragraph};
 
 pub struct Fser {
     ebook: String,
@@ -46,7 +46,12 @@ impl Fser {
             let ttst = Paragraph::new(format!("Terminal too small\nRequired 40x20\nCurrent {}x{}", area.width, area.height)).red().centered();
             frame.render_widget(ttst, area);
         } else {
-            frame.render_widget(Paragraph::new("hello works"), area);
+            let main_layout = Layout::vertical([Constraint::Min(1), Constraint::Fill(1)]).split(area);
+            let header = Layout::horizontal([Constraint::Min(15), Constraint::Fill(1)]).split(main_layout[0]);
+            let name_and_ver = Paragraph::new("fser v0.1.0").bold();
+            let ebook_title = Paragraph::new(self.ebook.clone()).right_aligned();
+            frame.render_widget(name_and_ver, header[0]);
+            frame.render_widget(ebook_title, header[1]);
         }
     }
 
