@@ -1,4 +1,5 @@
 mod fser;
+mod reader;
 
 use std::{env::args, path::PathBuf, process::exit};
 

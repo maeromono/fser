@@ -7,12 +7,14 @@ use ratatui::{
     style::Stylize,
     widgets::Paragraph,
 };
-use rbook::Epub;
+use rbook::{Epub, epub::spine::EpubSpineEntry};
+
+use crate::reader::render_reader;
 
 pub struct Fser {
     ebook: Epub,
     ebook_title: String,
-    page_index: i32,
+    page_index: usize,
     state: FserState,
 }
 
@@ -38,6 +40,25 @@ impl Fser {
         }
     }
 
+    fn spine_len(&self) -> usize {
+        self.ebook.spine().len()
+    }
+
+    fn current_entry(&self) -> Option<EpubSpineEntry<'_>> {
+        self.ebook.spine().get(self.page_index)
+    }
+
+    fn next_chapter(&mut self) {
+        let len = self.spine_len();
+        if self.page_index + 1 < len {
+            self.page_index += 1;
+        }
+    }
+
+    fn prev_chapter(&mut self) {
+        self.page_index = self.page_index.saturating_sub(1);
+    }
+
     pub fn run(&mut self, term: &mut DefaultTerminal) -> Result<()> {
         while self.state != FserState::Quit {
             term.draw(|frame| self.render(frame))?;
@@ -52,7 +73,7 @@ impl Fser {
         Ok(())
     }
 
-    pub fn render(&self, frame: &mut Frame) {
+    pub fn render(&mut self, frame: &mut Frame) {
         let area = frame.area();
         if area.width < 40 || area.height < 20 {
             // vv terminal too small text
@@ -72,6 +93,10 @@ impl Fser {
             let ebook_title = Paragraph::new(self.ebook_title.clone()).right_aligned();
             frame.render_widget(name_and_ver, header[0]);
             frame.render_widget(ebook_title, header[1]);
+            match self.state {
+                FserState::Reading => render_reader(self, frame, main_layout[1]),
+                _ => {}
+            }
         }
     }
 
