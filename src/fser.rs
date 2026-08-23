@@ -1,10 +1,17 @@
 use std::io::Result;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use ratatui::{DefaultTerminal, Frame, layout::{Constraint, Layout}, style::Stylize, widgets::Paragraph};
+use ratatui::{
+    DefaultTerminal, Frame,
+    layout::{Constraint, Layout},
+    style::Stylize,
+    widgets::Paragraph,
+};
+use rbook::Epub;
 
 pub struct Fser {
-    ebook: String,
+    ebook: Epub,
+    ebook_title: String,
     page_index: i32,
     state: FserState,
 }
@@ -17,9 +24,15 @@ enum FserState {
 }
 
 impl Fser {
-    pub fn new() -> Self {
+    pub fn new(ebook: Epub) -> Self {
+        let ebook_title = if let Some(title) = ebook.metadata().title() {
+            title.value().to_string()
+        } else {
+            "Title-less book".to_string()
+        };
         Self {
-            ebook: "hi".to_string(),
+            ebook,
+            ebook_title,
             page_index: 0,
             state: FserState::Reading,
         }
@@ -43,13 +56,20 @@ impl Fser {
         let area = frame.area();
         if area.width < 40 || area.height < 20 {
             // vv terminal too small text
-            let ttst = Paragraph::new(format!("Terminal too small\nRequired 40x20\nCurrent {}x{}", area.width, area.height)).red().centered();
+            let ttst = Paragraph::new(format!(
+                "Terminal too small\nRequired 40x20\nCurrent {}x{}",
+                area.width, area.height
+            ))
+            .red()
+            .centered();
             frame.render_widget(ttst, area);
         } else {
-            let main_layout = Layout::vertical([Constraint::Min(1), Constraint::Fill(1)]).split(area);
-            let header = Layout::horizontal([Constraint::Min(15), Constraint::Fill(1)]).split(main_layout[0]);
+            let main_layout =
+                Layout::vertical([Constraint::Min(1), Constraint::Fill(1)]).split(area);
+            let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)])
+                .split(main_layout[0]);
             let name_and_ver = Paragraph::new("fser v0.1.0").bold();
-            let ebook_title = Paragraph::new(self.ebook.clone()).right_aligned();
+            let ebook_title = Paragraph::new(self.ebook_title.clone()).right_aligned();
             frame.render_widget(name_and_ver, header[0]);
             frame.render_widget(ebook_title, header[1]);
         }
@@ -60,8 +80,8 @@ impl Fser {
             KeyCode::Char('q') => self.state = FserState::Quit,
             _ => match self.state {
                 FserState::Reading => {}
-                _ => todo!()
-            }
+                _ => todo!(),
+            },
         };
     }
 }
