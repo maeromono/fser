@@ -3,6 +3,14 @@ name = "fser"
 version = "0.1.0"
 authors = ["EnmakaiDev"]
 edition = "2024"
+license = "GPL-3.0"
+license-file = "LICENSE.md"
+description = "A dumbed-down TUI EPUB reader."
+repository = "https://codeberg.org/enmkdev/fser"
+homepage = "https://enmkdev.neocities.org/projects/fser/"
+readme = "README.md"
+keywords = ["tui", "epub", "reader"]
+categories = ["command-line-interface", "command-line-utilities"]
 
 [dependencies]
 crossterm = "0.29.0"
