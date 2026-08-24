@@ -15,6 +15,8 @@ pub struct Fser {
     pub ebook: Epub,
     pub scroll: u16,
     pub current_content: Option<String>,
+    pub cached_lines: Option<Vec<String>>,
+    pub cached_width: u16,
     ebook_title: String,
     page_index: usize,
     state: FserState,
@@ -37,6 +39,8 @@ impl Fser {
             ebook,
             scroll: 0,
             current_content: None,
+            cached_lines: None,
+            cached_width: 0,
             ebook_title,
             page_index: 0,
             state: FserState::Reading,
@@ -58,6 +62,7 @@ impl Fser {
             self.page_index += 1;
             self.scroll = 0;
             self.current_content = self.load_chapter();
+            self.cached_lines = None;
         }
     }
 
@@ -65,6 +70,7 @@ impl Fser {
         self.page_index = self.page_index.saturating_sub(1);
         self.scroll = 0;
         self.current_content = self.load_chapter();
+        self.cached_lines = None;
     }
 
     pub fn run(&mut self, term: &mut DefaultTerminal) -> Result<()> {
