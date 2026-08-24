@@ -27,7 +27,6 @@ fn main() {
         eprintln!("Not a valid EPUB file.");
         exit(1);
     };
-    println!("{:?}", ebook);
     let mut fser = Fser::new(ebook);
     let _ = run(|term| fser.run(term));
 }
