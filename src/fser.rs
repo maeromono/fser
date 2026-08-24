@@ -9,7 +9,7 @@ use ratatui::{
 };
 use rbook::Epub;
 
-use crate::reader::render_reader;
+use crate::{meta::{self, render_meta}, reader::{self, render_reader}};
 
 pub struct Fser {
     pub ebook: Epub,
@@ -17,14 +17,15 @@ pub struct Fser {
     pub current_content: Option<String>,
     pub cached_lines: Option<Vec<String>>,
     pub cached_width: u16,
+    pub state: FserState,
     ebook_title: String,
     page_index: usize,
-    state: FserState,
 }
 
 #[derive(PartialEq, Eq)]
-enum FserState {
+pub enum FserState {
     Reading,
+    Meta,
     Quit,
 }
 
@@ -41,9 +42,9 @@ impl Fser {
             current_content: None,
             cached_lines: None,
             cached_width: 0,
+            state: FserState::Reading,
             ebook_title,
             page_index: 0,
-            state: FserState::Reading,
         }
     }
 
@@ -57,7 +58,7 @@ impl Fser {
         Some(content.content().to_owned())
     }
 
-    fn next_chapter(&mut self) {
+    pub fn next_chapter(&mut self) {
         if self.page_index + 1 < self.spine_len() {
             self.page_index += 1;
             self.scroll = 0;
@@ -66,7 +67,7 @@ impl Fser {
         }
     }
 
-    fn prev_chapter(&mut self) {
+    pub fn prev_chapter(&mut self) {
         self.page_index = self.page_index.saturating_sub(1);
         self.scroll = 0;
         self.current_content = self.load_chapter();
@@ -116,6 +117,7 @@ impl Fser {
             frame.render_widget(position_track, main_layout[2]);
             match self.state {
                 FserState::Reading => render_reader(self, frame, main_layout[1]),
+                FserState::Meta => render_meta(self, frame, main_layout[1]),
                 _ => {}
             }
         }
@@ -125,16 +127,9 @@ impl Fser {
         match key.code {
             KeyCode::Char('q') => self.state = FserState::Quit,
             _ => match self.state {
-                FserState::Reading => match key.code {
-                    KeyCode::Char('n') => self.next_chapter(),
-                    KeyCode::Char('p') => self.prev_chapter(),
-                    KeyCode::Char('j') | KeyCode::Down => self.scroll += 1,
-                    KeyCode::Char('d') => self.scroll += 5,
-                    KeyCode::Char('k') | KeyCode::Up => self.scroll = self.scroll.saturating_sub(1),
-                    KeyCode::Char('u') => self.scroll = self.scroll.saturating_sub(5),
-                    _ => {}
-                },
-                _ => todo!(),
+                FserState::Reading => reader::handle_keys(self, &key),
+                FserState::Meta => meta::handle_keys(self, &key),
+                _ => {}
             },
         };
     }

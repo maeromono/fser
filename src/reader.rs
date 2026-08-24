@@ -1,11 +1,10 @@
 use std::io::Cursor;
 
+use crossterm::event::{KeyCode, KeyEvent};
 use html2text::from_read;
-use ratatui::{
-    Frame, layout::Rect, text::Line, widgets::Paragraph
-};
+use ratatui::{Frame, layout::Rect, text::Line, widgets::Paragraph};
 
-use crate::fser::Fser;
+use crate::fser::{Fser, FserState};
 
 pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let Some(content) = &fser.current_content else {
@@ -36,4 +35,17 @@ pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
 
     let paragraph = Paragraph::new(visible);
     frame.render_widget(paragraph, area);
+}
+
+pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
+    match key.code {
+        KeyCode::Char('n') => fser.next_chapter(),
+        KeyCode::Char('p') => fser.prev_chapter(),
+        KeyCode::Char('j') | KeyCode::Down => fser.scroll += 1,
+        KeyCode::Char('d') => fser.scroll += 5,
+        KeyCode::Char('k') | KeyCode::Up => fser.scroll = fser.scroll.saturating_sub(1),
+        KeyCode::Char('u') => fser.scroll = fser.scroll.saturating_sub(5),
+        KeyCode::Char('m') => fser.state = FserState::Meta,
+        _ => {}
+    };
 }
