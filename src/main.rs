@@ -28,5 +28,6 @@ fn main() {
         exit(1);
     };
     let mut fser = Fser::new(ebook);
+    fser.current_content = fser.load_chapter();
     let _ = run(|term| fser.run(term));
 }

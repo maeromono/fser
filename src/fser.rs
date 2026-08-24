@@ -14,6 +14,7 @@ use crate::reader::render_reader;
 pub struct Fser {
     pub ebook: Epub,
     pub scroll: u16,
+    pub current_content: Option<String>,
     ebook_title: String,
     page_index: usize,
     state: FserState,
@@ -35,6 +36,7 @@ impl Fser {
         Self {
             ebook,
             scroll: 0,
+            current_content: None,
             ebook_title,
             page_index: 0,
             state: FserState::Reading,
@@ -45,7 +47,7 @@ impl Fser {
         self.ebook.spine().len()
     }
 
-    pub fn current_content(&self) -> Option<String> {
+    pub fn load_chapter(&mut self) -> Option<String> {
         let mut reader = self.ebook.reader();
         let content = reader.read(self.page_index).ok()?;
         Some(content.content().to_owned())
@@ -55,12 +57,14 @@ impl Fser {
         if self.page_index + 1 < self.spine_len() {
             self.page_index += 1;
             self.scroll = 0;
+            self.current_content = self.load_chapter();
         }
     }
 
     fn prev_chapter(&mut self) {
         self.page_index = self.page_index.saturating_sub(1);
         self.scroll = 0;
+        self.current_content = self.load_chapter();
     }
 
     pub fn run(&mut self, term: &mut DefaultTerminal) -> Result<()> {
@@ -89,14 +93,21 @@ impl Fser {
             .centered();
             frame.render_widget(ttst, area);
         } else {
-            let main_layout =
-                Layout::vertical([Constraint::Length(1), Constraint::Fill(1)]).split(area);
+            let main_layout = Layout::vertical([
+                Constraint::Length(1),
+                Constraint::Fill(1),
+                Constraint::Length(1),
+            ])
+            .split(area);
             let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)])
                 .split(main_layout[0]);
             let name_and_ver = Paragraph::new("fser v0.1.0").bold();
             let ebook_title = Paragraph::new(self.ebook_title.clone()).right_aligned();
+            let position_track =
+                Paragraph::new(format!("{}/{}", self.page_index + 1, self.spine_len())).centered();
             frame.render_widget(name_and_ver, header[0]);
             frame.render_widget(ebook_title, header[1]);
+            frame.render_widget(position_track, main_layout[2]);
             match self.state {
                 FserState::Reading => render_reader(self, frame, main_layout[1]),
                 _ => {}
