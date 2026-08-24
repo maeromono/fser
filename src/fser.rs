@@ -22,7 +22,6 @@ pub struct Fser {
 #[derive(PartialEq, Eq)]
 enum FserState {
     Reading,
-    Meta,
     Quit,
 }
 
@@ -111,11 +110,9 @@ impl Fser {
                     KeyCode::Char('n') => self.next_chapter(),
                     KeyCode::Char('p') => self.prev_chapter(),
                     KeyCode::Char('j') | KeyCode::Down => self.scroll += 1,
-                    KeyCode::Char('k') | KeyCode::Up => {
-                        if self.scroll > 0 {
-                            self.scroll -= 1
-                        }
-                    }
+                    KeyCode::Char('d') => self.scroll += 5,
+                    KeyCode::Char('k') | KeyCode::Up => self.scroll = self.scroll.saturating_sub(1),
+                    KeyCode::Char('u') => self.scroll = self.scroll.saturating_sub(5),
                     _ => {}
                 },
                 _ => todo!(),
