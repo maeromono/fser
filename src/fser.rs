@@ -7,12 +7,13 @@ use ratatui::{
     style::Stylize,
     widgets::Paragraph,
 };
-use rbook::{Epub, epub::spine::EpubSpineEntry};
+use rbook::{Epub, epub::spine::{EpubSpine, EpubSpineEntry}};
 
 use crate::reader::render_reader;
 
 pub struct Fser {
-    ebook: Epub,
+    pub ebook: Epub,
+    pub scroll: u16,
     ebook_title: String,
     page_index: usize,
     state: FserState,
@@ -34,23 +35,25 @@ impl Fser {
         };
         Self {
             ebook,
+            scroll: 0,
             ebook_title,
             page_index: 0,
             state: FserState::Reading,
         }
     }
 
-    fn spine_len(&self) -> usize {
+    pub fn spine_len(&self) -> usize {
         self.ebook.spine().len()
     }
 
-    fn current_entry(&self) -> Option<EpubSpineEntry<'_>> {
-        self.ebook.spine().get(self.page_index)
+    pub fn current_content(&self) -> Option<String> {
+        let mut reader = self.ebook.reader();
+        let content = reader.read(self.page_index).ok()?;
+        Some(content.content().to_owned())
     }
 
     fn next_chapter(&mut self) {
-        let len = self.spine_len();
-        if self.page_index + 1 < len {
+        if self.page_index + 1 < self.spine_len() {
             self.page_index += 1;
         }
     }
@@ -86,7 +89,7 @@ impl Fser {
             frame.render_widget(ttst, area);
         } else {
             let main_layout =
-                Layout::vertical([Constraint::Min(1), Constraint::Fill(1)]).split(area);
+                Layout::vertical([Constraint::Length(1), Constraint::Fill(1)]).split(area);
             let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)])
                 .split(main_layout[0]);
             let name_and_ver = Paragraph::new("fser v0.1.0").bold();
@@ -104,7 +107,11 @@ impl Fser {
         match key.code {
             KeyCode::Char('q') => self.state = FserState::Quit,
             _ => match self.state {
-                FserState::Reading => {}
+                FserState::Reading => match key.code {
+                    KeyCode::Char('n') => self.next_chapter(),
+                    KeyCode::Char('p') => self.prev_chapter(),
+                    _ => {}
+                }
                 _ => todo!(),
             },
         };
