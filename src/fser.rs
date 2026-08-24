@@ -7,7 +7,7 @@ use ratatui::{
     style::Stylize,
     widgets::Paragraph,
 };
-use rbook::{Epub, epub::spine::{EpubSpine, EpubSpineEntry}};
+use rbook::Epub;
 
 use crate::reader::render_reader;
 
@@ -110,8 +110,14 @@ impl Fser {
                 FserState::Reading => match key.code {
                     KeyCode::Char('n') => self.next_chapter(),
                     KeyCode::Char('p') => self.prev_chapter(),
+                    KeyCode::Char('j') | KeyCode::Down => self.scroll += 1,
+                    KeyCode::Char('k') | KeyCode::Up => {
+                        if self.scroll > 0 {
+                            self.scroll -= 1
+                        }
+                    }
                     _ => {}
-                }
+                },
                 _ => todo!(),
             },
         };
