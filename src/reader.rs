@@ -13,8 +13,6 @@ pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let Some(content) = fser.current_content() else {
         return;
     };
-    // apparently string doesn't implement read so i had to use this bitch ass solution i found
-    // online
     let Ok(parsed) = from_read(Cursor::new(content.as_bytes()), area.width as usize) else {
         return;
     };
