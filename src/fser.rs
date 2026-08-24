@@ -54,11 +54,13 @@ impl Fser {
     fn next_chapter(&mut self) {
         if self.page_index + 1 < self.spine_len() {
             self.page_index += 1;
+            self.scroll = 0;
         }
     }
 
     fn prev_chapter(&mut self) {
         self.page_index = self.page_index.saturating_sub(1);
+        self.scroll = 0;
     }
 
     pub fn run(&mut self, term: &mut DefaultTerminal) -> Result<()> {
