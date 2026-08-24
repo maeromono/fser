@@ -17,6 +17,8 @@ directories = "6.0.0"
 html2text = "0.17.1"
 ratatui = "0.30.2"
 rbook = "0.7.10"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.4"
 
 [profile.release]
 opt-level = 3
