@@ -1,4 +1,4 @@
-use std::io::Result;
+use std::io::{Error, Result};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
@@ -26,6 +26,8 @@ pub struct Fser {
     pub cached_width: u16,
     pub state: FserState,
     pub page_index: usize,
+    pub bookmark_just_added: (bool, bool, Option<Error>), // for visual feedback (couldn't come up with a better solution)
+    // 0: true for displaying, 1: true if added, false if removed, 2: error message
     ebook_title: String,
 }
 
@@ -55,6 +57,7 @@ impl Fser {
             cached_width: 0,
             state: FserState::Reading,
             page_index: 0,
+            bookmark_just_added: (false, false, None),
             ebook_title,
         }
     }
@@ -117,10 +120,10 @@ impl Fser {
 
     pub fn render(&mut self, frame: &mut Frame) {
         let area = frame.area();
-        if area.width < 40 || area.height < 20 {
+        if area.width < 40 || area.height < 25 {
             // vv terminal too small text
             let ttst = Paragraph::new(format!(
-                "Terminal too small\nRequired 40x20\nCurrent {}x{}",
+                "Terminal too small\nRequired 40x25\nCurrent {}x{}",
                 area.width, area.height
             ))
             .red()
@@ -137,11 +140,30 @@ impl Fser {
                 .split(main_layout[0]);
             let name_and_ver = Paragraph::new("fser v0.2.0").bold();
             let ebook_title = Paragraph::new(self.ebook_title.clone()).right_aligned();
-            let position_track =
-                Paragraph::new(format!("{}/{}", self.page_index + 1, self.spine_len())).centered();
             frame.render_widget(name_and_ver, header[0]);
             frame.render_widget(ebook_title, header[1]);
-            frame.render_widget(position_track, main_layout[2]);
+            if self.bookmark_just_added.0 {
+                let status = if let Some(err) = &self.bookmark_just_added.2 {
+                    Paragraph::new(format!("Bookmark won't save: {}", err))
+                        .red()
+                        .bold()
+                        .centered()
+                } else {
+                    Paragraph::new(match self.bookmark_just_added.1 {
+                        true => "Bookmark added",
+                        false => "Bookmark removed",
+                    })
+                    .bold()
+                    .centered()
+                };
+                frame.render_widget(status, main_layout[2]);
+                self.bookmark_just_added = (false, false, None);
+            } else {
+                let position_track =
+                    Paragraph::new(format!("{}/{}", self.page_index + 1, self.spine_len()))
+                        .centered();
+                frame.render_widget(position_track, main_layout[2]);
+            }
             match self.state {
                 FserState::Bookmark => render_bookmarks(self, frame, main_layout[1]),
                 FserState::Reading => render_reader(self, frame, main_layout[1]),

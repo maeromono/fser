@@ -64,6 +64,7 @@ fn add_or_remove_bookmark(fser: &mut Fser) {
         scroll: fser.scroll,
     };
     let path = fser.ebook_path.clone();
+    let bookmark_added: bool;
     match fser.bookmarks.bookmarks.entry(path) {
         Entry::Occupied(mut entry) => {
             let bookmarks = entry.get_mut();
@@ -71,13 +72,21 @@ fn add_or_remove_bookmark(fser: &mut Fser) {
             bookmarks.retain(|bm| {
                 !(bm.page_index == new_bookmark.page_index && bm.scroll == new_bookmark.scroll)
             });
-            if bookmarks.len() == before {
+            bookmark_added = if bookmarks.len() == before {
                 bookmarks.push(new_bookmark);
+                true
+            } else {
+                false
             }
         }
         Entry::Vacant(entry) => {
             entry.insert(vec![new_bookmark]);
+            bookmark_added = true;
         }
     }
-    let _ = save_bookmarks(&fser.bookmarks);
+    if let Err(err) = save_bookmarks(&fser.bookmarks) {
+        fser.bookmark_just_added = (true, bookmark_added, Some(err));
+    } else {
+        fser.bookmark_just_added = (true, bookmark_added, None);
+    }
 }

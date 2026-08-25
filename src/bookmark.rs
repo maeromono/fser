@@ -7,7 +7,7 @@ use std::{
 
 use crossterm::event::{KeyCode, KeyEvent};
 use directories::ProjectDirs;
-use ratatui::{Frame, layout::Rect, style::Modifier, widgets::List};
+use ratatui::{Frame, layout::{Constraint, Rect}, style::Modifier, widgets::List};
 use serde::{Deserialize, Serialize};
 use toml::{from_str, to_string};
 
@@ -59,8 +59,9 @@ fn build_bookmarks(fser: &Fser) -> (Vec<String>, Vec<BookmarkAction>) {
 
 pub fn render_bookmarks(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let (items, _) = build_bookmarks(fser);
+    let bm_area = area.centered(Constraint::Max(50), Constraint::Percentage(30));
     let list = List::new(items).highlight_style(Modifier::REVERSED);
-    frame.render_stateful_widget(list, area, &mut fser.bookmarks_list);
+    frame.render_stateful_widget(list, bm_area, &mut fser.bookmarks_list);
 }
 
 pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
