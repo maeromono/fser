@@ -9,10 +9,11 @@ use ratatui::{
 };
 use rbook::Epub;
 
-use crate::{meta::{self, render_meta}, reader::{self, render_reader}};
+use crate::{bookmark::FserSave, meta::{self, render_meta}, reader::{self, render_reader}};
 
 pub struct Fser {
     pub ebook: Epub,
+    pub bookmarks: FserSave,
     pub scroll: u16,
     pub current_content: Option<String>,
     pub cached_lines: Option<Vec<String>>,
@@ -38,6 +39,7 @@ impl Fser {
         };
         Self {
             ebook,
+            bookmarks: FserSave::default(),
             scroll: 0,
             current_content: None,
             cached_lines: None,

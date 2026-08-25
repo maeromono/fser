@@ -8,7 +8,10 @@ use std::{env::args, path::PathBuf, process::exit};
 use ratatui::run;
 use rbook::Epub;
 
-use crate::fser::Fser;
+use crate::{
+    bookmark::{FserSave, load_bookmarks},
+    fser::Fser,
+};
 
 fn main() {
     let mut args = args().skip(1);
@@ -30,6 +33,13 @@ fn main() {
         exit(1);
     };
     let mut fser = Fser::new(ebook);
+    fser.bookmarks = load_bookmarks().unwrap_or_else(|err| {
+        eprintln!(
+            "Failed to load bookmarks, falling back to defaults. Details: {}",
+            err
+        );
+        FserSave::default()
+    });
     fser.current_content = fser.load_chapter();
     let _ = run(|term| fser.run(term));
 }
