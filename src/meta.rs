@@ -1,5 +1,9 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use ratatui::{Frame, layout::Rect, widgets::{Paragraph, Wrap}};
+use ratatui::{
+    Frame,
+    layout::Rect,
+    widgets::{Paragraph, Wrap},
+};
 
 use crate::fser::{Fser, FserState};
 
@@ -59,8 +63,7 @@ pub fn render_meta(fser: &mut Fser, frame: &mut Frame, area: Rect) {
 }
 
 pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
-    match key.code {
-        KeyCode::Char('m') => fser.state = FserState::Reading,
-        _ => {}
+    if let KeyCode::Char('m') = key.code {
+        fser.state = FserState::Reading
     }
 }

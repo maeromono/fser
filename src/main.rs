@@ -32,7 +32,7 @@ fn main() {
         eprintln!("Not a valid EPUB file.");
         exit(1);
     };
-    let path_string = da_path.into_os_string().into_string().unwrap_or_default();
+    let path_string = da_path.to_string_lossy().into_owned();
     let mut fser = Fser::new(ebook, path_string.clone());
     fser.bookmarks = load_bookmarks().unwrap_or_else(|err| {
         eprintln!(
@@ -58,5 +58,8 @@ fn main() {
         fser.state = FserState::Bookmark;
     }
     fser.current_content = fser.load_chapter();
-    let _ = run(|term| fser.run(term));
+    if let Err(err) = run(|term| fser.run(term)) {
+        eprintln!("Terminal error: {}", err);
+        exit(1);
+    }
 }

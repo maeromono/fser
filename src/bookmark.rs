@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
-    fs::{create_dir_all, read_to_string, write},
-    io::{Error, ErrorKind, Result},
+    fs::{File, create_dir_all, read_to_string, rename},
+    io::{Error, ErrorKind, Result, Write},
     path::PathBuf,
 };
 
@@ -29,7 +29,7 @@ pub struct Bookmark {
 enum BookmarkAction {
     FirstPage,
     ContinueReading,
-    Bookmark { page_index: usize, scroll: u16 }, // or whatever your bookmark type is
+    Bookmark { page_index: usize, scroll: u16 },
 }
 
 fn build_bookmarks(fser: &Fser) -> (Vec<String>, Vec<BookmarkAction>) {
@@ -69,21 +69,24 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
         KeyCode::Char('k') | KeyCode::Up => fser.bookmarks_list.select_previous(),
         KeyCode::Enter => {
             let (_, actions) = build_bookmarks(fser);
-            if let Some(selected) = fser.bookmarks_list.selected() {
-                if let Some(action) = actions.get(selected) {
-                    match action {
-                        BookmarkAction::FirstPage => {
-                            fser.page_index = 0;
-                            fser.scroll = 0;
+            if let Some(selected) = fser.bookmarks_list.selected()
+                && let Some(action) = actions.get(selected)
+            {
+                match action {
+                    BookmarkAction::FirstPage => {
+                        fser.page_index = 0;
+                        fser.scroll = 0;
+                    }
+                    BookmarkAction::ContinueReading => {
+                        if let Some(state) = fser.bookmarks.last_state.get(&fser.ebook_path) {
+                            let (page_index, scroll) = (state.page_index, state.scroll);
+                            fser.jump_to_chapter(page_index);
+                            fser.scroll = scroll;
                         }
-                        BookmarkAction::ContinueReading => {
-                            fser.jump_to_chapter(fser.bookmarks.last_state[&fser.ebook_path].page_index);
-                            fser.scroll = fser.bookmarks.last_state[&fser.ebook_path].scroll;
-                        }
-                        BookmarkAction::Bookmark { page_index, scroll } => {
-                            fser.jump_to_chapter(*page_index);
-                            fser.scroll = *scroll;
-                        }
+                    }
+                    BookmarkAction::Bookmark { page_index, scroll } => {
+                        fser.jump_to_chapter(*page_index);
+                        fser.scroll = *scroll;
                     }
                 }
             }
@@ -94,29 +97,38 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
     }
 }
 
-fn save_path() -> PathBuf {
-    ProjectDirs::from("org.neocities", "enmkdev", "fser")
-        .expect("cannot access directory")
-        .data_dir()
-        .join("bookmarks.toml")
+fn save_path() -> Result<PathBuf> {
+    let dirs = ProjectDirs::from("org.neocities", "enmkdev", "fser")
+        .ok_or_else(|| Error::new(ErrorKind::NotFound, "could not determine data directory"))?;
+    Ok(dirs.data_dir().join("bookmarks.toml"))
 }
 
 pub fn save_bookmarks(save: &FserSave) -> Result<()> {
-    let path = save_path();
+    let path = save_path()?;
     if let Some(parent) = path.parent() {
         create_dir_all(parent)?;
     }
-    let contents = to_string(save).map_err(|err| Error::new(ErrorKind::Other, err))?;
-    write(path, contents)?;
+    let contents = to_string(save).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
+    let tmp_path = path.with_extension("toml.tmp");
+    let mut tmp = File::create(&tmp_path)?;
+    tmp.write_all(contents.as_bytes())?;
+    tmp.sync_all()?;
+    rename(&tmp_path, &path)?;
     Ok(())
 }
 
 pub fn load_bookmarks() -> Result<FserSave> {
-    let path = save_path();
-    if !path.exists() {
-        return Ok(FserSave::default());
+    let path = save_path()?;
+    let contents = match read_to_string(&path) {
+        Ok(contents) => contents,
+        Err(err) if err.kind() == ErrorKind::NotFound => return Ok(FserSave::default()),
+        Err(err) => return Err(err),
+    };
+    match from_str(&contents) {
+        Ok(fsersave) => Ok(fsersave),
+        Err(err) => {
+            let _ = rename(&path, path.with_extension("toml.corrupt"));
+            Err(Error::new(ErrorKind::InvalidData, err))
+        }
     }
-    let contents = read_to_string(path)?;
-    let fsersave = from_str(&contents).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
-    Ok(fsersave)
 }

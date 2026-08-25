@@ -2,7 +2,7 @@ use std::{collections::hash_map::Entry, io::Cursor};
 
 use crossterm::event::{KeyCode, KeyEvent};
 use html2text::from_read;
-use ratatui::{Frame, layout::Rect, text::Line, widgets::Paragraph};
+use ratatui::{Frame, layout::Rect, style::Stylize, text::Line, widgets::Paragraph};
 
 use crate::{
     bookmark::{Bookmark, save_bookmarks},
@@ -11,6 +11,10 @@ use crate::{
 
 pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let Some(content) = &fser.current_content else {
+        let error = Paragraph::new("Load failed")
+            .red()
+            .bold();
+        frame.render_widget(error, area);
         return;
     };
     if fser.cached_lines.is_none() || fser.cached_width != area.width {
@@ -44,8 +48,8 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
     match key.code {
         KeyCode::Char('n') => fser.next_chapter(),
         KeyCode::Char('p') => fser.prev_chapter(),
-        KeyCode::Char('j') | KeyCode::Down => fser.scroll += 1,
-        KeyCode::Char('d') => fser.scroll += 5,
+        KeyCode::Char('j') | KeyCode::Down => fser.scroll = fser.scroll.saturating_add(1),
+        KeyCode::Char('d') => fser.scroll = fser.scroll.saturating_add(5),
         KeyCode::Char('k') | KeyCode::Up => fser.scroll = fser.scroll.saturating_sub(1),
         KeyCode::Char('u') => fser.scroll = fser.scroll.saturating_sub(5),
         KeyCode::Char('m') => fser.state = FserState::Meta,

@@ -9,7 +9,11 @@ use ratatui::{
 };
 use rbook::Epub;
 
-use crate::{bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, meta::{self, render_meta}, reader::{self, render_reader}};
+use crate::{
+    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks},
+    meta::{self, render_meta},
+    reader::{self, render_reader},
+};
 
 pub struct Fser {
     pub ebook: Epub,
@@ -66,28 +70,34 @@ impl Fser {
     }
 
     pub fn jump_to_chapter(&mut self, index: usize) {
-        if index + 1 > self.spine_len() {
+        if index >= self.spine_len() {
             return;
         }
         self.page_index = index;
         self.scroll = 0;
-        self.current_content = self.load_chapter();
-        self.cached_lines = None;
+        self.refresh_content();
     }
 
     pub fn next_chapter(&mut self) {
         if self.page_index + 1 < self.spine_len() {
             self.page_index += 1;
             self.scroll = 0;
-            self.current_content = self.load_chapter();
-            self.cached_lines = None;
+            self.refresh_content();
         }
     }
 
     pub fn prev_chapter(&mut self) {
-        self.page_index = self.page_index.saturating_sub(1);
-        self.scroll = 0;
-        self.current_content = self.load_chapter();
+        if self.page_index > 0 {
+            self.page_index -= 1;
+            self.scroll = 0;
+            self.refresh_content();
+        }
+    }
+
+    fn refresh_content(&mut self) {
+        if let Some(content) = self.load_chapter() {
+            self.current_content = Some(content);
+        }
         self.cached_lines = None;
     }
 
@@ -146,18 +156,25 @@ impl Fser {
             KeyCode::Char('q') => self.save_and_quit(),
             _ => match self.state {
                 FserState::Bookmark => bookmark::handle_keys(self, key),
-                FserState::Reading => reader::handle_keys(self, &key),
-                FserState::Meta => meta::handle_keys(self, &key),
+                FserState::Reading => reader::handle_keys(self, key),
+                FserState::Meta => meta::handle_keys(self, key),
                 _ => {}
             },
         };
     }
 
     fn save_and_quit(&mut self) {
-        self.bookmarks.last_state.entry(self.ebook_path.clone()).and_modify(|bm| {
-            bm.page_index = self.page_index;
-            bm.scroll = self.scroll;
-        }).or_insert(Bookmark { page_index: self.page_index, scroll: self.scroll });
+        self.bookmarks
+            .last_state
+            .entry(self.ebook_path.clone())
+            .and_modify(|bm| {
+                bm.page_index = self.page_index;
+                bm.scroll = self.scroll;
+            })
+            .or_insert(Bookmark {
+                page_index: self.page_index,
+                scroll: self.scroll,
+            });
         if let Err(err) = save_bookmarks(&self.bookmarks) {
             eprintln!("Failed to save bookmarks: {}", err);
         }
