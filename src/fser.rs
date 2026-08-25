@@ -138,7 +138,7 @@ impl Fser {
             .split(area);
             let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)])
                 .split(main_layout[0]);
-            let name_and_ver = Paragraph::new("fser v0.2.0").bold();
+            let name_and_ver = Paragraph::new("fser v0.2.1").bold();
             let ebook_title = Paragraph::new(self.ebook_title.clone()).right_aligned();
             frame.render_widget(name_and_ver, header[0]);
             frame.render_widget(ebook_title, header[1]);
