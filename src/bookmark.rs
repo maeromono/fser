@@ -75,7 +75,9 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
             {
                 match action {
                     BookmarkAction::FirstPage => {
-                        fser.page_index = 0;
+                        if fser.page_index != 0 {
+                            fser.jump_to_chapter(0);
+                        }
                         fser.scroll = 0;
                     }
                     BookmarkAction::ContinueReading => {
