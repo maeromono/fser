@@ -5,33 +5,36 @@ use ratatui::{
     DefaultTerminal, Frame,
     layout::{Constraint, Layout},
     style::Stylize,
-    widgets::Paragraph,
+    widgets::{ListState, Paragraph},
 };
 use rbook::Epub;
 
-use crate::{bookmark::FserSave, meta::{self, render_meta}, reader::{self, render_reader}};
+use crate::{bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, meta::{self, render_meta}, reader::{self, render_reader}};
 
 pub struct Fser {
     pub ebook: Epub,
+    pub ebook_path: String,
     pub bookmarks: FserSave,
+    pub bookmarks_list: ListState,
     pub scroll: u16,
     pub current_content: Option<String>,
     pub cached_lines: Option<Vec<String>>,
     pub cached_width: u16,
     pub state: FserState,
+    pub page_index: usize,
     ebook_title: String,
-    page_index: usize,
 }
 
 #[derive(PartialEq, Eq)]
 pub enum FserState {
+    Bookmark,
     Reading,
     Meta,
     Quit,
 }
 
 impl Fser {
-    pub fn new(ebook: Epub) -> Self {
+    pub fn new(ebook: Epub, path: String) -> Self {
         let ebook_title = if let Some(title) = ebook.metadata().title() {
             title.value().to_string()
         } else {
@@ -39,14 +42,16 @@ impl Fser {
         };
         Self {
             ebook,
+            ebook_path: path,
             bookmarks: FserSave::default(),
+            bookmarks_list: ListState::default().with_selected(Some(0)),
             scroll: 0,
             current_content: None,
             cached_lines: None,
             cached_width: 0,
             state: FserState::Reading,
-            ebook_title,
             page_index: 0,
+            ebook_title,
         }
     }
 
@@ -58,6 +63,16 @@ impl Fser {
         let mut reader = self.ebook.reader();
         let content = reader.read(self.page_index).ok()?;
         Some(content.content().to_owned())
+    }
+
+    pub fn jump_to_chapter(&mut self, index: usize) {
+        if index + 1 > self.spine_len() {
+            return;
+        }
+        self.page_index = index;
+        self.scroll = 0;
+        self.current_content = self.load_chapter();
+        self.cached_lines = None;
     }
 
     pub fn next_chapter(&mut self) {
@@ -118,6 +133,7 @@ impl Fser {
             frame.render_widget(ebook_title, header[1]);
             frame.render_widget(position_track, main_layout[2]);
             match self.state {
+                FserState::Bookmark => render_bookmarks(self, frame, main_layout[1]),
                 FserState::Reading => render_reader(self, frame, main_layout[1]),
                 FserState::Meta => render_meta(self, frame, main_layout[1]),
                 _ => {}
@@ -127,12 +143,24 @@ impl Fser {
 
     pub fn handle_keys(&mut self, key: &KeyEvent) {
         match key.code {
-            KeyCode::Char('q') => self.state = FserState::Quit,
+            KeyCode::Char('q') => self.save_and_quit(),
             _ => match self.state {
+                FserState::Bookmark => bookmark::handle_keys(self, key),
                 FserState::Reading => reader::handle_keys(self, &key),
                 FserState::Meta => meta::handle_keys(self, &key),
                 _ => {}
             },
         };
+    }
+
+    fn save_and_quit(&mut self) {
+        self.bookmarks.last_state.entry(self.ebook_path.clone()).and_modify(|bm| {
+            bm.page_index = self.page_index;
+            bm.scroll = self.scroll;
+        }).or_insert(Bookmark { page_index: self.page_index, scroll: self.scroll });
+        if let Err(err) = save_bookmarks(&self.bookmarks) {
+            eprintln!("Failed to save bookmarks: {}", err);
+        }
+        self.state = FserState::Quit;
     }
 }

@@ -10,7 +10,7 @@ use rbook::Epub;
 
 use crate::{
     bookmark::{FserSave, load_bookmarks},
-    fser::Fser,
+    fser::{Fser, FserState},
 };
 
 fn main() {
@@ -28,11 +28,12 @@ fn main() {
         eprintln!("Not a valid path.");
         exit(1);
     }
-    let Ok(ebook) = Epub::open(da_path) else {
+    let Ok(ebook) = Epub::open(&da_path) else {
         eprintln!("Not a valid EPUB file.");
         exit(1);
     };
-    let mut fser = Fser::new(ebook);
+    let path_string = da_path.into_os_string().into_string().unwrap_or_default();
+    let mut fser = Fser::new(ebook, path_string.clone());
     fser.bookmarks = load_bookmarks().unwrap_or_else(|err| {
         eprintln!(
             "Failed to load bookmarks, falling back to defaults. Details: {}",
@@ -40,6 +41,22 @@ fn main() {
         );
         FserSave::default()
     });
+    let has_saved_state = fser
+        .bookmarks
+        .last_state
+        .get(&path_string)
+        .map(|s| s.page_index > 0 || s.scroll > 0)
+        .unwrap_or(false)
+        || fser
+            .bookmarks
+            .bookmarks
+            .get(&path_string)
+            .map(|b| !b.is_empty())
+            .unwrap_or(false);
+
+    if has_saved_state {
+        fser.state = FserState::Bookmark;
+    }
     fser.current_content = fser.load_chapter();
     let _ = run(|term| fser.run(term));
 }

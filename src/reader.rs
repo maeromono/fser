@@ -1,10 +1,13 @@
-use std::io::Cursor;
+use std::{collections::hash_map::Entry, io::Cursor};
 
 use crossterm::event::{KeyCode, KeyEvent};
 use html2text::from_read;
 use ratatui::{Frame, layout::Rect, text::Line, widgets::Paragraph};
 
-use crate::fser::{Fser, FserState};
+use crate::{
+    bookmark::{Bookmark, save_bookmarks},
+    fser::{Fser, FserState},
+};
 
 pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let Some(content) = &fser.current_content else {
@@ -46,6 +49,31 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
         KeyCode::Char('k') | KeyCode::Up => fser.scroll = fser.scroll.saturating_sub(1),
         KeyCode::Char('u') => fser.scroll = fser.scroll.saturating_sub(5),
         KeyCode::Char('m') => fser.state = FserState::Meta,
+        KeyCode::Char('b') => add_or_remove_bookmark(fser),
         _ => {}
     };
+}
+
+fn add_or_remove_bookmark(fser: &mut Fser) {
+    let new_bookmark = Bookmark {
+        page_index: fser.page_index,
+        scroll: fser.scroll,
+    };
+    let path = fser.ebook_path.clone();
+    match fser.bookmarks.bookmarks.entry(path) {
+        Entry::Occupied(mut entry) => {
+            let bookmarks = entry.get_mut();
+            let before = bookmarks.len();
+            bookmarks.retain(|bm| {
+                !(bm.page_index == new_bookmark.page_index && bm.scroll == new_bookmark.scroll)
+            });
+            if bookmarks.len() == before {
+                bookmarks.push(new_bookmark);
+            }
+        }
+        Entry::Vacant(entry) => {
+            entry.insert(vec![new_bookmark]);
+        }
+    }
+    let _ = save_bookmarks(&fser.bookmarks);
 }

@@ -1,20 +1,97 @@
-use std::{collections::HashMap, fs::{create_dir_all, read_to_string, write}, io::{Error, ErrorKind, Result}, path::PathBuf};
+use std::{
+    collections::HashMap,
+    fs::{create_dir_all, read_to_string, write},
+    io::{Error, ErrorKind, Result},
+    path::PathBuf,
+};
 
+use crossterm::event::{KeyCode, KeyEvent};
 use directories::ProjectDirs;
+use ratatui::{Frame, layout::Rect, style::Modifier, widgets::List};
 use serde::{Deserialize, Serialize};
 use toml::{from_str, to_string};
+
+use crate::fser::{Fser, FserState};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct FserSave {
     pub last_state: HashMap<String, Bookmark>, // automatically created bookmarks
-    pub bookmarks: HashMap<String, Bookmark>, // manually created bookmarks
-    // key = path to ebook btw
+    pub bookmarks: HashMap<String, Vec<Bookmark>>, // manually created bookmarks
+                                               // key = path to ebook btw
 }
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Bookmark {
     pub page_index: usize,
     pub scroll: u16,
+}
+
+enum BookmarkAction {
+    FirstPage,
+    ContinueReading,
+    Bookmark { page_index: usize, scroll: u16 }, // or whatever your bookmark type is
+}
+
+fn build_bookmarks(fser: &Fser) -> (Vec<String>, Vec<BookmarkAction>) {
+    let mut items = vec!["First page".to_string()];
+    let mut actions = vec![BookmarkAction::FirstPage];
+    if fser
+        .bookmarks
+        .last_state
+        .get(&fser.ebook_path)
+        .map(|s| s.page_index > 0 || s.scroll > 0)
+        .unwrap_or(false)
+    {
+        items.push("Continue reading".to_string());
+        actions.push(BookmarkAction::ContinueReading);
+    }
+    if let Some(bookmarks) = fser.bookmarks.bookmarks.get(&fser.ebook_path) {
+        for b in bookmarks {
+            items.push(format!("Bookmark {}/{}", b.page_index, b.scroll));
+            actions.push(BookmarkAction::Bookmark {
+                page_index: b.page_index,
+                scroll: b.scroll,
+            });
+        }
+    }
+    (items, actions)
+}
+
+pub fn render_bookmarks(fser: &mut Fser, frame: &mut Frame, area: Rect) {
+    let (items, _) = build_bookmarks(fser);
+    let list = List::new(items).highlight_style(Modifier::REVERSED);
+    frame.render_stateful_widget(list, area, &mut fser.bookmarks_list);
+}
+
+pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
+    match key.code {
+        KeyCode::Char('j') | KeyCode::Down => fser.bookmarks_list.select_next(),
+        KeyCode::Char('k') | KeyCode::Up => fser.bookmarks_list.select_previous(),
+        KeyCode::Enter => {
+            let (_, actions) = build_bookmarks(fser);
+            if let Some(selected) = fser.bookmarks_list.selected() {
+                if let Some(action) = actions.get(selected) {
+                    match action {
+                        BookmarkAction::FirstPage => {
+                            fser.page_index = 0;
+                            fser.scroll = 0;
+                        }
+                        BookmarkAction::ContinueReading => {
+                            fser.jump_to_chapter(fser.bookmarks.last_state[&fser.ebook_path].page_index);
+                            fser.scroll = fser.bookmarks.last_state[&fser.ebook_path].scroll;
+                        }
+                        BookmarkAction::Bookmark { page_index, scroll } => {
+                            fser.jump_to_chapter(*page_index);
+                            fser.scroll = *scroll;
+                        }
+                    }
+                }
+            }
+            fser.bookmarks_list.select(Some(0));
+            fser.state = FserState::Reading;
+        }
+        _ => {}
+    }
 }
 
 fn save_path() -> PathBuf {
@@ -37,7 +114,7 @@ pub fn save_bookmarks(save: &FserSave) -> Result<()> {
 pub fn load_bookmarks() -> Result<FserSave> {
     let path = save_path();
     if !path.exists() {
-        return Ok(FserSave::default())
+        return Ok(FserSave::default());
     }
     let contents = read_to_string(path)?;
     let fsersave = from_str(&contents).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
