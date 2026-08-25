@@ -11,7 +11,7 @@ Prerequisites:
 
 ### Through Cargo (recommended)
 ```bash
-    cargo install fser
+    cargo install --locked fser
 ```
 
 ### From source
@@ -31,11 +31,14 @@ More arguments may or may not come in future updates.
 - j/k -- Scroll up/down
 - d/u -- Scroll up/down but faster
 - n/p -- Next/previous page/chapter
+- b -- Add/remove bookmark
+- m -- Ebook meta page
 - q -- Quit fser
 
 ## Roadmap.
-- [ ] Separate ebook metadata page
-- [ ] Bookmarking support
+- [X] Separate ebook metadata page
+- [X] Bookmarking support
+- [ ] ???
 
 ## License.
 GPL-3.0 only. Read more in [the license file](https://codeberg.org/enmkdev/fser/src/branch/main/LICENSE.md).
