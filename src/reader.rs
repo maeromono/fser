@@ -52,6 +52,8 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
         KeyCode::Char('d') => fser.scroll = fser.scroll.saturating_add(5),
         KeyCode::Char('k') | KeyCode::Up => fser.scroll = fser.scroll.saturating_sub(1),
         KeyCode::Char('u') => fser.scroll = fser.scroll.saturating_sub(5),
+        KeyCode::Char('g') => fser.scroll = 0,
+        KeyCode::Char('G') => fser.scroll = u16::MAX,
         KeyCode::Char('m') => fser.state = FserState::Meta,
         KeyCode::Char('b') => add_or_remove_bookmark(fser),
         KeyCode::Char('B') => fser.state = FserState::Bookmark,
