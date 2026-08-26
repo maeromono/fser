@@ -24,6 +24,7 @@ pub fn render_footer(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     .split(area);
     render_bookmark_status(fser, frame, footer[0]);
     render_page_progress(fser, frame, footer[1]);
+    render_read_progress(fser, frame, footer[2]);
 }
 
 fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
@@ -50,4 +51,9 @@ fn render_page_progress(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let position_track =
         Paragraph::new(format!("{}/{}", fser.page_index + 1, fser.spine_len())).centered();
     frame.render_widget(position_track, area);
+}
+
+fn render_read_progress(fser: &mut Fser, frame: &mut Frame, area: Rect) {
+    let progress = Paragraph::new(format!("{}% V {}Ln", (fser.page_index+1)*100/fser.spine_len(), fser.scroll)).right_aligned();
+    frame.render_widget(progress, area);
 }
