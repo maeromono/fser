@@ -63,7 +63,8 @@ pub fn render_meta(fser: &mut Fser, frame: &mut Frame, area: Rect) {
 }
 
 pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
-    if let KeyCode::Char('m') = key.code {
-        fser.state = FserState::Reading
+    match key.code {
+        KeyCode::Char('m') | KeyCode::Esc => fser.state = FserState::Reading,
+        _ => {}
     }
 }

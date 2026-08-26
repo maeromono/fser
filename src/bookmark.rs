@@ -66,7 +66,7 @@ pub fn render_bookmarks(fser: &mut Fser, frame: &mut Frame, area: Rect) {
 
 pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
     match key.code {
-        KeyCode::Char('B') => fser.state = FserState::Reading,
+        KeyCode::Char('B') | KeyCode::Esc => fser.state = FserState::Reading,
         KeyCode::Char('j') | KeyCode::Down => fser.bookmarks_list.select_next(),
         KeyCode::Char('k') | KeyCode::Up => fser.bookmarks_list.select_previous(),
         KeyCode::Enter => {
