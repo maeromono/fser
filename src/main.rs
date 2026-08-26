@@ -1,5 +1,6 @@
 mod bookmark;
 mod fser;
+mod fsermain;
 mod meta;
 mod reader;
 

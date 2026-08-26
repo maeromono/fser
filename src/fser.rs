@@ -10,9 +10,7 @@ use ratatui::{
 use rbook::Epub;
 
 use crate::{
-    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks},
-    meta::{self, render_meta},
-    reader::{self, render_reader},
+    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
 };
 
 pub struct Fser {
@@ -28,7 +26,7 @@ pub struct Fser {
     pub page_index: usize,
     pub bookmark_just_added: (bool, bool, Option<Error>), // for visual feedback (couldn't come up with a better solution)
     // 0: true for displaying, 1: true if added, false if removed, 2: error message
-    ebook_title: String,
+    pub ebook_title: String,
 }
 
 #[derive(PartialEq, Eq)]
@@ -136,40 +134,14 @@ impl Fser {
                 Constraint::Length(1),
             ])
             .split(area);
-            let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)])
-                .split(main_layout[0]);
-            let name_and_ver = Paragraph::new("fser v0.2.2").bold();
-            let ebook_title = Paragraph::new(self.ebook_title.clone()).right_aligned();
-            frame.render_widget(name_and_ver, header[0]);
-            frame.render_widget(ebook_title, header[1]);
-            if self.bookmark_just_added.0 {
-                let status = if let Some(err) = &self.bookmark_just_added.2 {
-                    Paragraph::new(format!("Bookmark added, but won't save: {}", err))
-                        .red()
-                        .bold()
-                        .centered()
-                } else {
-                    Paragraph::new(match self.bookmark_just_added.1 {
-                        true => "Bookmark added",
-                        false => "Bookmark removed",
-                    })
-                    .bold()
-                    .centered()
-                };
-                frame.render_widget(status, main_layout[2]);
-                self.bookmark_just_added = (false, false, None);
-            } else {
-                let position_track =
-                    Paragraph::new(format!("{}/{}", self.page_index + 1, self.spine_len()))
-                        .centered();
-                frame.render_widget(position_track, main_layout[2]);
-            }
+            render_header(self, frame, main_layout[0]);
             match self.state {
                 FserState::Bookmark => render_bookmarks(self, frame, main_layout[1]),
                 FserState::Reading => render_reader(self, frame, main_layout[1]),
                 FserState::Meta => render_meta(self, frame, main_layout[1]),
                 _ => {}
             }
+            render_footer(self, frame, main_layout[2]);
         }
     }
 
