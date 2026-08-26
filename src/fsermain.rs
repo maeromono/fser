@@ -9,7 +9,7 @@ use crate::fser::Fser;
 
 pub fn render_header(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)]).split(area);
-    let name_and_ver = Paragraph::new("fser v0.2.2").bold();
+    let name_and_ver = Paragraph::new("fser v0.3.0").bold();
     let ebook_title = Paragraph::new(fser.ebook_title.clone()).right_aligned();
     frame.render_widget(name_and_ver, header[0]);
     frame.render_widget(ebook_title, header[1]);
@@ -54,6 +54,6 @@ fn render_page_progress(fser: &mut Fser, frame: &mut Frame, area: Rect) {
 }
 
 fn render_read_progress(fser: &mut Fser, frame: &mut Frame, area: Rect) {
-    let progress = Paragraph::new(format!("{}% V {}Ln", (fser.page_index+1)*100/fser.spine_len(), fser.scroll)).right_aligned();
+    let progress = Paragraph::new(format!("{}Ln", fser.scroll)).right_aligned();
     frame.render_widget(progress, area);
 }

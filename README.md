@@ -31,6 +31,7 @@ More arguments may or may not come in future updates.
 - j/k -- Scroll up/down
 - d/u -- Scroll up/down but faster
 - n/p -- Next/previous page/chapter
+- g/G -- Jump to top/bottom of page/chapter
 - b -- Add/remove bookmark
 - B (shift+b) -- Bookmark menu
 - m -- Ebook meta page
