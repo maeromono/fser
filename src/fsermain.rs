@@ -26,7 +26,7 @@ pub fn render_footer(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     render_page_progress(fser, frame, footer[1]);
 }
 
-pub fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
+fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     if fser.bookmark_just_added.0 {
         let status = if let Some(err) = &fser.bookmark_just_added.2 {
             Paragraph::new(format!("Bookmark added, but won't save: {}", err))
@@ -46,7 +46,7 @@ pub fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     }
 }
 
-pub fn render_page_progress(fser: &mut Fser, frame: &mut Frame, area: Rect) {
+fn render_page_progress(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let position_track =
         Paragraph::new(format!("{}/{}", fser.page_index + 1, fser.spine_len())).centered();
     frame.render_widget(position_track, area);
