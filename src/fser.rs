@@ -10,7 +10,10 @@ use ratatui::{
 use rbook::Epub;
 
 use crate::{
-    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
+    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks},
+    fsermain::{render_footer, render_header},
+    meta::{self, render_meta},
+    reader::{self, render_reader},
 };
 
 pub struct Fser {

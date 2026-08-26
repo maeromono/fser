@@ -7,7 +7,12 @@ use std::{
 
 use crossterm::event::{KeyCode, KeyEvent};
 use directories::ProjectDirs;
-use ratatui::{Frame, layout::{Constraint, Rect}, style::Modifier, widgets::List};
+use ratatui::{
+    Frame,
+    layout::{Constraint, Rect},
+    style::Modifier,
+    widgets::List,
+};
 use serde::{Deserialize, Serialize};
 use toml::{from_str, to_string};
 

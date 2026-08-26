@@ -11,9 +11,7 @@ use crate::{
 
 pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let Some(content) = &fser.current_content else {
-        let error = Paragraph::new("Load failed")
-            .red()
-            .bold();
+        let error = Paragraph::new("Load failed").red().bold();
         frame.render_widget(error, area);
         return;
     };
