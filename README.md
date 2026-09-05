@@ -27,15 +27,15 @@ Prerequisites:
 More arguments may or may not come in future updates.
 
 ## Binds.
-q             Save progress & quit fser
-?/F1          Bind help
-n/p           Next/previous page/chapter
-j/k, Up/Down  Scroll down/up
-d/u           Scroll down/up but faster
-g/G           Jump to top/bottom
-m             View ebook metadata
-b             Add/remove bookmark
-B             Open bookmark menu
+- q -- Save progress & quit fser
+- ?/F1 -- Bind help
+- n/p -- Next/previous page/chapter
+- j/k, Up/Down -- Scroll down/up
+- d/u -- Scroll down/up but faster
+- g/G -- Jump to top/bottom
+- m -- View ebook metadata
+- b -- Add/remove bookmark
+- B -- Open bookmark menu
 
 ## Roadmap.
 - [X] Separate ebook metadata page
