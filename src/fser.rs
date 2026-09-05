@@ -140,7 +140,7 @@ impl Fser {
             render_header(self, frame, main_layout[0]);
             match self.state {
                 FserState::Bookmark => render_bookmarks(self, frame, main_layout[1]),
-                FserState::Reading => render_reader(self, frame, main_layout[1]),
+                FserState::Reading => render_reader(self, frame, main_layout[1].centered_horizontally(Constraint::Max(100))),
                 FserState::Meta => render_meta(self, frame, main_layout[1]),
                 _ => {}
             }
