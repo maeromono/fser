@@ -9,7 +9,7 @@ use ratatui::{
 use crate::fser::{Fser, FserState};
 
 const BINDINGS: &[(&str, &str)] = &[
-    ("q", "Save progress & quit"),
+    ("q", "Save progress & quit fser"),
     ("?/F1", "Bind help (you're here)"),
     ("n/p", "Next/previous page/chapter"),
     ("j/k, Up/Down", "Scroll down/up"),

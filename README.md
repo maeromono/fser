@@ -27,15 +27,15 @@ Prerequisites:
 More arguments may or may not come in future updates.
 
 ## Binds.
-(vim-like, but not actually vim cuz it doesn't have an insert mode)
-- j/k -- Scroll up/down
-- d/u -- Scroll up/down but faster
-- n/p -- Next/previous page/chapter
-- g/G -- Jump to top/bottom of page/chapter
-- b -- Add/remove bookmark
-- B (shift+b) -- Bookmark menu
-- m -- Ebook meta page
-- q -- Quit fser
+q             Save progress & quit fser
+?/F1          Bind help
+n/p           Next/previous page/chapter
+j/k, Up/Down  Scroll down/up
+d/u           Scroll down/up but faster
+g/G           Jump to top/bottom
+m             View ebook metadata
+b             Add/remove bookmark
+B             Open bookmark menu
 
 ## Roadmap.
 - [X] Separate ebook metadata page
