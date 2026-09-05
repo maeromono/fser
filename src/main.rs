@@ -11,7 +11,7 @@ use rbook::Epub;
 
 use crate::{
     bookmark::{FserSave, load_bookmarks},
-    fser::{Fser, FserState},
+    fser::Fser,
 };
 
 fn main() {
@@ -42,22 +42,12 @@ fn main() {
         );
         FserSave::default()
     });
-    let has_saved_state = fser
+    (fser.page_index, fser.scroll) = fser
         .bookmarks
         .last_state
         .get(&path_string)
-        .map(|s| s.page_index > 0 || s.scroll > 0)
-        .unwrap_or(false)
-        || fser
-            .bookmarks
-            .bookmarks
-            .get(&path_string)
-            .map(|b| !b.is_empty())
-            .unwrap_or(false);
-
-    if has_saved_state {
-        fser.state = FserState::Bookmark;
-    }
+        .map(|b| (b.page_index, b.scroll))
+        .unwrap_or_else(|| (0, 0));
     fser.current_content = fser.load_chapter();
     if let Err(err) = run(|term| fser.run(term)) {
         eprintln!("Terminal error: {}", err);
