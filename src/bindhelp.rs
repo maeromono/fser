@@ -1,7 +1,7 @@
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     Frame,
-    layout::Rect,
+    layout::{Constraint, Rect},
     text::Line,
     widgets::Paragraph,
 };
@@ -26,7 +26,7 @@ pub fn render_bindhelp(_fser: &mut Fser, frame: &mut Frame, area: Rect) {
         .iter()
         .map(|(keys, action)| Line::from(format!("{:<13} {}", keys, action)))
         .collect();
-    frame.render_widget(Paragraph::new(lines), area);
+    frame.render_widget(Paragraph::new(lines), area.centered(Constraint::Max(50), Constraint::Length(10)));
 }
 
 pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
