@@ -2,7 +2,7 @@ use ratatui::{
     Frame,
     layout::{Constraint, Layout, Rect},
     style::Stylize,
-    widgets::{Clear, Paragraph},
+    widgets::Paragraph,
 };
 
 use crate::fser::Fser;

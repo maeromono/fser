@@ -10,10 +10,7 @@ use ratatui::{
 use rbook::Epub;
 
 use crate::{
-    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks},
-    fsermain::{render_footer, render_header},
-    meta::{self, render_meta},
-    reader::{self, render_reader},
+    bindhelp::{self, render_bindhelp}, bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
 };
 
 pub struct Fser {
@@ -35,6 +32,7 @@ pub struct Fser {
 #[derive(PartialEq, Eq)]
 pub enum FserState {
     Bookmark,
+    BindHelp,
     Reading,
     Meta,
     Quit,
@@ -44,6 +42,7 @@ impl Display for FserState {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
             FserState::Bookmark => "Bookmark menu",
+            FserState::BindHelp => "Bind help",
             FserState::Reading => "Reading",
             FserState::Meta => "Viewing metadata",
             _ => ""
@@ -151,6 +150,7 @@ impl Fser {
             render_header(self, frame, main_layout[0]);
             match self.state {
                 FserState::Bookmark => render_bookmarks(self, frame, main_layout[1]),
+                FserState::BindHelp => render_bindhelp(self, frame, main_layout[1]),
                 FserState::Reading => render_reader(self, frame, main_layout[1]),
                 FserState::Meta => render_meta(self, frame, main_layout[1]),
                 _ => {}
@@ -164,6 +164,7 @@ impl Fser {
             KeyCode::Char('q') => self.save_and_quit(),
             _ => match self.state {
                 FserState::Bookmark => bookmark::handle_keys(self, key),
+                FserState::BindHelp => bindhelp::handle_keys(self, key),
                 FserState::Reading => reader::handle_keys(self, key),
                 FserState::Meta => meta::handle_keys(self, key),
                 _ => {}

@@ -37,7 +37,6 @@ pub fn render_reader(fser: &mut Fser, frame: &mut Frame, area: Rect) {
         .iter()
         .map(|l| Line::from(l.as_str()))
         .collect();
-
     let paragraph = Paragraph::new(visible);
     frame.render_widget(paragraph, area);
 }
@@ -55,6 +54,7 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
         KeyCode::Char('m') => fser.state = FserState::Meta,
         KeyCode::Char('b') => add_or_remove_bookmark(fser),
         KeyCode::Char('B') => fser.state = FserState::Bookmark,
+        KeyCode::Char('?') | KeyCode::F(1) => fser.state = FserState::BindHelp,
         _ => {}
     };
 }
