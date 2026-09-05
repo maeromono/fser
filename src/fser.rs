@@ -1,4 +1,4 @@
-use std::io::{Error, Result};
+use std::{fmt::{Display, Formatter}, io::{Error, Result}};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
@@ -38,6 +38,17 @@ pub enum FserState {
     Reading,
     Meta,
     Quit,
+}
+
+impl Display for FserState {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            FserState::Bookmark => "Bookmark menu",
+            FserState::Reading => "Reading",
+            FserState::Meta => "Viewing metadata",
+            _ => ""
+        })
+    }
 }
 
 impl Fser {
@@ -136,11 +147,11 @@ impl Fser {
                 Constraint::Fill(1),
                 Constraint::Length(1),
             ])
-            .split(area);
+            .split(area.centered_horizontally(Constraint::Max(100)));
             render_header(self, frame, main_layout[0]);
             match self.state {
                 FserState::Bookmark => render_bookmarks(self, frame, main_layout[1]),
-                FserState::Reading => render_reader(self, frame, main_layout[1].centered_horizontally(Constraint::Max(100))),
+                FserState::Reading => render_reader(self, frame, main_layout[1]),
                 FserState::Meta => render_meta(self, frame, main_layout[1]),
                 _ => {}
             }

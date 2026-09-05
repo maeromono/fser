@@ -43,7 +43,7 @@ fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
         frame.render_widget(status, area);
         fser.bookmark_just_added = (false, false, None);
     } else {
-        frame.render_widget(Clear, area);
+        frame.render_widget(Paragraph::new(format!("{}", fser.state)), area);
     }
 }
 
