@@ -129,7 +129,7 @@ impl Fser {
         Ok(())
     }
 
-    pub fn render(&mut self, frame: &mut Frame) {
+    fn render(&mut self, frame: &mut Frame) {
         let area = frame.area();
         if area.width < 40 || area.height < 25 {
             // vv terminal too small text
