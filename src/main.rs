@@ -5,7 +5,7 @@ mod fsermain;
 mod meta;
 mod reader;
 
-use std::{env::args, path::PathBuf, process::exit};
+use std::{env::args, path::{PathBuf, absolute}, process::exit};
 
 use ratatui::run;
 use rbook::Epub;
@@ -25,7 +25,7 @@ fn main() {
         eprintln!("Provide ONLY a path to an EPUB file.");
         exit(1);
     }
-    let da_path = PathBuf::from(da_sus_path);
+    let da_path = absolute(PathBuf::from(da_sus_path)).expect("cannot convert path to absolute");
     if !da_path.exists() {
         eprintln!("Not a valid path.");
         exit(1);
