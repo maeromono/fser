@@ -52,7 +52,7 @@ fn build_bookmarks(fser: &Fser) -> (Vec<String>, Vec<BookmarkAction>) {
     }
     if let Some(bookmarks) = fser.bookmarks.bookmarks.get(&fser.ebook_path) {
         for b in bookmarks {
-            items.push(format!("Bookmark {}/{}", b.page_index, b.scroll));
+            items.push(format!("Bookmark {}/{}", b.page_index + 1, b.scroll));
             actions.push(BookmarkAction::Bookmark {
                 page_index: b.page_index,
                 scroll: b.scroll,
@@ -118,7 +118,7 @@ pub fn save_bookmarks(save: &FserSave) -> Result<()> {
         create_dir_all(parent)?;
     }
     let contents = to_string(save).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
-    let tmp_path = path.with_extension("toml.tmp");
+    let tmp_path = path.with_extension("tmp");
     let mut tmp = File::create(&tmp_path)?;
     tmp.write_all(contents.as_bytes())?;
     tmp.sync_all()?;
@@ -136,7 +136,7 @@ pub fn load_bookmarks() -> Result<FserSave> {
     match from_str(&contents) {
         Ok(fsersave) => Ok(fsersave),
         Err(err) => {
-            let _ = rename(&path, path.with_extension("toml.corrupt"));
+            let _ = rename(&path, path.with_extension("corrupt"));
             Err(Error::new(ErrorKind::InvalidData, err))
         }
     }

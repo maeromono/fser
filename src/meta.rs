@@ -12,7 +12,7 @@ pub fn render_meta(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let description = meta
         .description()
         .map(|desc| desc.value().to_string())
-        .unwrap_or_else(|| "no description".to_string());
+        .unwrap_or_else(|| "This EPUB has no description.".to_string());
     let published = meta
         .published()
         .map(|publ| publ.date().to_string())

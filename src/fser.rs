@@ -159,7 +159,7 @@ impl Fser {
         }
     }
 
-    pub fn handle_keys(&mut self, key: &KeyEvent) {
+    fn handle_keys(&mut self, key: &KeyEvent) {
         match key.code {
             KeyCode::Char('q') => self.save_and_quit(),
             _ => match self.state {
