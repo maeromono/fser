@@ -30,7 +30,7 @@ fn main() {
         eprintln!("!! Not a valid path.");
         exit(1);
     }
-    let Ok(ebook) = Epub::open(&da_path) else {
+    let Ok(ebook) = Epub::options().skip_toc(true).open(&da_path) else {
         eprintln!("!! Not a valid EPUB file.");
         exit(1);
     };
