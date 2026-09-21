@@ -28,7 +28,7 @@ pub fn render_footer(fser: &mut Fser, frame: &mut Frame, area: Rect) {
 }
 
 fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
-    if fser.bookmark_just_added.0 {
+    if fser.bookmark_just_added.0 || fser.bookmark_just_added.3 > 0 {
         let status = if let Some(err) = &fser.bookmark_just_added.2 {
             Paragraph::new(format!("Bookmark added, but won't save: {}", err))
                 .red()
@@ -41,7 +41,10 @@ fn render_bookmark_status(fser: &mut Fser, frame: &mut Frame, area: Rect) {
             .bold()
         };
         frame.render_widget(status, area);
-        fser.bookmark_just_added = (false, false, None);
+        fser.bookmark_just_added.3 = fser.bookmark_just_added.3.saturating_sub(1);
+        if fser.bookmark_just_added.3 == 0 {
+            fser.bookmark_just_added = (false, false, None, 0);
+        }
     } else {
         frame.render_widget(Paragraph::new(format!("{}", fser.state)), area);
     }

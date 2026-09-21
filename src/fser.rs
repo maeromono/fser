@@ -24,8 +24,9 @@ pub struct Fser {
     pub cached_width: u16,
     pub state: FserState,
     pub page_index: usize,
-    pub bookmark_just_added: (bool, bool, Option<Error>), // for visual feedback (couldn't come up with a better solution)
-    // 0: true for displaying, 1: true if added, false if removed, 2: error message
+    pub bookmark_just_added: (bool, bool, Option<Error>, u8), // for visual feedback (couldn't come up with a better solution)
+    // 0: true for displaying, 1: true if added, false if removed, 2: error message, 3: frames the
+    //    message will last for
     pub ebook_title: String,
 }
 
@@ -68,7 +69,7 @@ impl Fser {
             cached_width: 0,
             state: FserState::Reading,
             page_index: 0,
-            bookmark_just_added: (false, false, None),
+            bookmark_just_added: (false, false, None, 0),
             ebook_title,
         }
     }

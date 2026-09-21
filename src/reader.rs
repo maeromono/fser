@@ -86,8 +86,8 @@ fn add_or_remove_bookmark(fser: &mut Fser) {
         }
     }
     if let Err(err) = save_bookmarks(&fser.bookmarks) {
-        fser.bookmark_just_added = (true, bookmark_added, Some(err));
+        fser.bookmark_just_added = (true, bookmark_added, Some(err), 5);
     } else {
-        fser.bookmark_just_added = (true, bookmark_added, None);
+        fser.bookmark_just_added = (true, bookmark_added, None, 5);
     }
 }
