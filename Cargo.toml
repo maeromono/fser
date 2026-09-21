@@ -1,6 +1,6 @@
 [package]
 name = "fser"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["EnmakaiDev"]
 edition = "2024"
 license = "GPL-3.0"
