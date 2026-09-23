@@ -10,7 +10,7 @@ use ratatui::{
 use rbook::Epub;
 
 use crate::{
-    bindhelp::{self, render_bindhelp}, bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, error::render_error_page, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
+    bindhelp::{self, render_bindhelp}, bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, error::{self, render_error_page}, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
 };
 
 pub struct Fser {
@@ -119,7 +119,7 @@ impl Fser {
         self.cached_lines = None;
     }
 
-    fn send_error(&mut self, error: Error) {
+    pub fn send_error(&mut self, error: Error) {
         self.errors.0.push(error);
         self.state = FserState::Error;
     }
@@ -177,6 +177,7 @@ impl Fser {
                 FserState::BindHelp => bindhelp::handle_keys(self, key),
                 FserState::Reading => reader::handle_keys(self, key),
                 FserState::Meta => meta::handle_keys(self, key),
+                FserState::Error => error::handle_keys(self, key),
                 _ => {}
             },
         };
