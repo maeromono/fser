@@ -1,11 +1,21 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use ratatui::{Frame, layout::{Constraint, Layout, Rect}, style::{Modifier, Stylize}, widgets::{List, ListState, Paragraph}};
+use ratatui::{
+    Frame,
+    layout::{Constraint, Layout, Rect},
+    style::{Modifier, Stylize},
+    widgets::{List, ListState, Paragraph, Wrap},
+};
 
 use crate::fser::{Fser, FserState};
 
 pub fn render_error_page(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let error_layout = Layout::vertical([Constraint::Max(3), Constraint::Fill(1)]).split(area);
-    let error_paragraph = Paragraph::new("Some errors have occurred at runtime. Review them, then press Esc to go back to reading.").red().bold();
+    let error_paragraph = Paragraph::new(
+        "Some errors have occurred at runtime. Review them, then press Esc to go back to reading.",
+    )
+    .red()
+    .bold()
+    .wrap(Wrap { trim: true });
     let mut error_list: Vec<String> = vec![];
     for error in &fser.errors.0 {
         error_list.push(error.to_string());
