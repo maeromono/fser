@@ -10,7 +10,7 @@ use ratatui::{
 use rbook::Epub;
 
 use crate::{
-    bindhelp::{self, render_bindhelp}, bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
+    bindhelp::{self, render_bindhelp}, bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, error::render_error_page, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
 };
 
 pub struct Fser {
@@ -28,7 +28,7 @@ pub struct Fser {
     // 0: true for displaying, 1: true if added, false if removed, 3: frames the
     //    message will last for
     pub ebook_title: String,
-    pub errors: Vec<Error>,
+    pub errors: (Vec<Error>, ListState), // 0: actual list, 1: to navigate lol
 }
 
 #[derive(PartialEq, Eq)]
@@ -73,7 +73,7 @@ impl Fser {
             page_index: 0,
             bookmark_just_added: (false, false, 0),
             ebook_title,
-            errors: vec![]
+            errors: (vec![], ListState::default().with_selected(Some(0)))
         }
     }
 
@@ -120,7 +120,7 @@ impl Fser {
     }
 
     fn send_error(&mut self, error: Error) {
-        self.errors.push(error);
+        self.errors.0.push(error);
         self.state = FserState::Error;
     }
 
@@ -162,6 +162,7 @@ impl Fser {
                 FserState::BindHelp => render_bindhelp(self, frame, main_layout[1]),
                 FserState::Reading => render_reader(self, frame, main_layout[1]),
                 FserState::Meta => render_meta(self, frame, main_layout[1]),
+                FserState::Error => render_error_page(self, frame, main_layout[1]),
                 _ => {}
             }
             render_footer(self, frame, main_layout[2]);
