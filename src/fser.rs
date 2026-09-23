@@ -24,10 +24,11 @@ pub struct Fser {
     pub cached_width: u16,
     pub state: FserState,
     pub page_index: usize,
-    pub bookmark_just_added: (bool, bool, Option<Error>, u8), // for visual feedback (couldn't come up with a better solution)
-    // 0: true for displaying, 1: true if added, false if removed, 2: error message, 3: frames the
+    pub bookmark_just_added: (bool, bool, u8), // for visual feedback (couldn't come up with a better solution)
+    // 0: true for displaying, 1: true if added, false if removed, 3: frames the
     //    message will last for
     pub ebook_title: String,
+    pub errors: Vec<Error>,
 }
 
 #[derive(PartialEq, Eq)]
@@ -36,6 +37,7 @@ pub enum FserState {
     BindHelp,
     Reading,
     Meta,
+    Error,
     Quit,
 }
 
@@ -69,8 +71,9 @@ impl Fser {
             cached_width: 0,
             state: FserState::Reading,
             page_index: 0,
-            bookmark_just_added: (false, false, None, 0),
+            bookmark_just_added: (false, false, 0),
             ebook_title,
+            errors: vec![]
         }
     }
 
@@ -114,6 +117,11 @@ impl Fser {
             self.current_content = Some(content);
         }
         self.cached_lines = None;
+    }
+
+    fn send_error(&mut self, error: Error) {
+        self.errors.push(error);
+        self.state = FserState::Error;
     }
 
     pub fn run(&mut self, term: &mut DefaultTerminal) -> Result<()> {

@@ -1,5 +1,6 @@
 mod bookmark;
 mod bindhelp;
+mod error;
 mod fser;
 mod fsermain;
 mod meta;
