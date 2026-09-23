@@ -1,4 +1,7 @@
-use std::{fmt::{Display, Formatter}, io::{Error, Result}};
+use std::{
+    fmt::{Display, Formatter},
+    io::{Error, Result},
+};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
@@ -10,7 +13,12 @@ use ratatui::{
 use rbook::Epub;
 
 use crate::{
-    bindhelp::{self, render_bindhelp}, bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks}, error::{self, render_error_page}, fsermain::{render_footer, render_header}, meta::{self, render_meta}, reader::{self, render_reader}
+    bindhelp::{self, render_bindhelp},
+    bookmark::{self, Bookmark, FserSave, render_bookmarks, save_bookmarks},
+    error::{self, render_error_page},
+    fsermain::{render_footer, render_header},
+    meta::{self, render_meta},
+    reader::{self, render_reader},
 };
 
 pub struct Fser {
@@ -43,13 +51,17 @@ pub enum FserState {
 
 impl Display for FserState {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            FserState::Bookmark => "Bookmark menu",
-            FserState::BindHelp => "Bind help",
-            FserState::Reading => "Reading",
-            FserState::Meta => "Viewing metadata",
-            _ => ""
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                FserState::Bookmark => "Bookmark menu",
+                FserState::BindHelp => "Bind help",
+                FserState::Reading => "Reading",
+                FserState::Meta => "Viewing metadata",
+                _ => "",
+            }
+        )
     }
 }
 
@@ -73,7 +85,7 @@ impl Fser {
             page_index: 0,
             bookmark_just_added: (false, false, 0),
             ebook_title,
-            errors: (vec![], ListState::default().with_selected(Some(0)))
+            errors: (vec![], ListState::default().with_selected(Some(0))),
         }
     }
 

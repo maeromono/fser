@@ -1,12 +1,16 @@
-mod bookmark;
 mod bindhelp;
+mod bookmark;
 mod error;
 mod fser;
 mod fsermain;
 mod meta;
 mod reader;
 
-use std::{env::args, path::{PathBuf, absolute}, process::exit};
+use std::{
+    env::args,
+    path::{PathBuf, absolute},
+    process::exit,
+};
 
 use ratatui::run;
 use rbook::Epub;
