@@ -87,7 +87,7 @@ fn add_or_remove_bookmark(fser: &mut Fser) {
     }
     if let Err(err) = save_bookmarks(&fser.bookmarks) {
         fser.bookmark_just_added = (true, bookmark_added, 5);
-        fser.send_error(err);
+        fser.send_error(format!("Cannot save bookmarks:\n{}", err));
     } else {
         fser.bookmark_just_added = (true, bookmark_added, 5);
     }

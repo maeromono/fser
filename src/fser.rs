@@ -1,6 +1,6 @@
 use std::{
     fmt::{Display, Formatter},
-    io::{Error, Result},
+    io::Result,
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
@@ -36,7 +36,7 @@ pub struct Fser {
     // 0: true for displaying, 1: true if added, false if removed, 3: frames the
     //    message will last for
     pub ebook_title: String,
-    pub errors: (Vec<Error>, ListState), // 0: actual list, 1: to navigate lol
+    pub error: Option<String>
 }
 
 #[derive(PartialEq, Eq)]
@@ -85,7 +85,7 @@ impl Fser {
             page_index: 0,
             bookmark_just_added: (false, false, 0),
             ebook_title,
-            errors: (vec![], ListState::default().with_selected(Some(0))),
+            error: None,
         }
     }
 
@@ -131,8 +131,8 @@ impl Fser {
         self.cached_lines = None;
     }
 
-    pub fn send_error(&mut self, error: Error) {
-        self.errors.0.push(error);
+    pub fn send_error(&mut self, message: String) {
+        self.error = Some(message);
         self.state = FserState::Error;
     }
 
