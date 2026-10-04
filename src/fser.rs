@@ -32,9 +32,7 @@ pub struct Fser {
     pub cached_width: u16,
     pub state: FserState,
     pub page_index: usize,
-    pub bookmark_just_added: (bool, bool, u8), // for visual feedback (couldn't come up with a better solution)
-    // 0: true for displaying, 1: true if added, false if removed, 3: frames the
-    //    message will last for
+    pub footer_notif: Option<String>, // currently inly used fir biikmarks..
     pub ebook_title: String,
     pub error: Option<String>
 }
@@ -83,7 +81,7 @@ impl Fser {
             cached_width: 0,
             state: FserState::Reading,
             page_index: 0,
-            bookmark_just_added: (false, false, 0),
+            footer_notif: None,
             ebook_title,
             error: None,
         }
@@ -134,6 +132,10 @@ impl Fser {
     pub fn send_error(&mut self, message: String) {
         self.error = Some(message);
         self.state = FserState::Error;
+    }
+
+    pub fn send_footer_notif(&mut self, message: String) {
+        self.footer_notif = Some(message);
     }
 
     pub fn run(&mut self, term: &mut DefaultTerminal) -> Result<()> {
