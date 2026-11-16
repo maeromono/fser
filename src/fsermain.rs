@@ -9,7 +9,7 @@ use crate::fser::Fser;
 
 pub fn render_header(fser: &mut Fser, frame: &mut Frame, area: Rect) {
     let header = Layout::horizontal([Constraint::Length(15), Constraint::Fill(1)]).split(area);
-    let name_and_ver = Paragraph::new("fser v0.5.3");
+    let name_and_ver = Paragraph::new("fser v0.5.4");
     let ebook_title = Paragraph::new(fser.ebook_title.clone()).right_aligned();
     frame.render_widget(name_and_ver, header[0]);
     frame.render_widget(ebook_title, header[1]);
