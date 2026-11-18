@@ -1,12 +1,12 @@
 [package]
 name = "fser"
-version = "0.5.4"
+version = "0.5.5"
 authors = ["MaeroMono"]
 edition = "2024"
 license = "GPL-3.0"
 description = "A dumbed-down TUI EPUB reader."
 repository = "https://codeberg.org/maeromono/fser"
-homepage = "https://maeromono.codeberg.page/projects/fser/"
+homepage = "https://maeromono.surge.sh/projects/fser/"
 readme = "README.md"
 keywords = ["tui", "epub", "reader"]
 categories = ["command-line-interface", "command-line-utilities"]

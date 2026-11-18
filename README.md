@@ -9,14 +9,14 @@ Because none of the existing EPUB readers met my standards. Some were Python-bas
 Prerequisites:
 - Rust/Cargo installed on your system (preferrably latest possible version)
 
-### Through Cargo (recommended)
+### Latest release (recommended)
 ```bash
     cargo install --locked fser
 ```
 
 ### From source
 ```bash
-    git clone https://codeberg.org/enmkdev/fser && cd fser && cargo install --path .
+    git clone https://codeberg.org/maeromono/fser && cd fser && cargo install --path .
 ```
 
 ## Usage.
@@ -43,4 +43,4 @@ More arguments may or may not come in future updates.
 - [ ] ???
 
 ## License.
-GPL-3.0 only. Read more in [the license file](https://codeberg.org/enmkdev/fser/src/branch/main/LICENSE.md).
+GPL-3.0 only. Read more in [the license file](https://codeberg.org/maeromono/fser/src/branch/main/LICENSE.md).

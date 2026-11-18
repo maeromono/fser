@@ -107,7 +107,7 @@ pub fn handle_keys(fser: &mut Fser, key: &KeyEvent) {
 }
 
 fn save_path() -> Result<PathBuf> {
-    let dirs = ProjectDirs::from("page.codeberg", "maeromono", "fser")
+    let dirs = ProjectDirs::from("sh.surge", "maeromono", "fser")
         .ok_or_else(|| Error::new(ErrorKind::NotFound, "could not determine data directory"))?;
     Ok(dirs.data_dir().join("bookmarks.toml"))
 }
