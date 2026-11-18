@@ -1,6 +1,6 @@
 [package]
 name = "fser"
-version = "0.5.5"
+version = "0.5.51"
 authors = ["MaeroMono"]
 edition = "2024"
 license = "GPL-3.0"
